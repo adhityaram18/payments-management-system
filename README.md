@@ -18,7 +18,7 @@ A modular Java-based console application that manages organizational payments, t
 - **Reporting Module**
   - Monthly, quarterly reports
   - Aggregation by direction, category, employee, and counterparty
-  - Export as **CSV**, (HTML/PDF coming soon)
+  - Export as **CSV**, HTML and PDF 
 
 - **Audit Logging**
   - Tracks changes like status updates for all payments
