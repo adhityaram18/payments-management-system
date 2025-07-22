@@ -16,6 +16,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Menu class providing CLI options to Finance Managers.
+ * Supports payment management, report generation, and status update workflows.
+ */
 public class FinanceManagerMenu {
   private final Scanner scanner;
   private final PaymentService paymentService;
@@ -23,6 +27,9 @@ public class FinanceManagerMenu {
   private final CounterpartyRepository counterpartyRepo;
   private final EmployeeRepository employeeRepo;
 
+  /**
+   * Initializes FinanceManagerMenu with required services and repositories.
+   */
   public FinanceManagerMenu(
     Scanner scanner,
     PaymentService paymentService,
@@ -37,6 +44,9 @@ public class FinanceManagerMenu {
     this.employeeRepo = employeeRepo;
   }
 
+  /**
+   * Displays finance manager dashboard and processes user input in a loop.
+   */
   public void showFinanceManagerMenu(User manager) {
     while (true) {
       System.out.println("======= Finance Manager Dashboard =======");
@@ -63,8 +73,11 @@ public class FinanceManagerMenu {
     }
   }
 
-  // ========== HANDLERS ==========
-
+  /**
+   * Handles adding a new payment: prompts for details, validates,
+   * assigns employee or counterparty depending on category,
+   * and delegates save operation to PaymentService.
+   */
   private void handleAddPayment(User manager) {
     System.out.println("---- Add Payment ----");
 
@@ -77,7 +90,7 @@ public class FinanceManagerMenu {
     Counterparty counterparty = null;
 
     if (category == PaymentCategory.SALARY) {
-      // Employee selection
+      // Select employee for salary payments
       List<Employee> emps = employeeRepo.findAll();
       if (emps.isEmpty()) {
         System.out.println("No employees found.");
@@ -91,7 +104,7 @@ public class FinanceManagerMenu {
         return;
       }
     } else {
-      // Counterparty selection
+      // Select counterparty for other payment types
       List<Counterparty> cps = counterpartyRepo.findAll();
       if (cps.isEmpty()) {
         System.out.println("No counterparties found.");
@@ -125,10 +138,13 @@ public class FinanceManagerMenu {
     }
   }
 
+  /**
+   * Handles updating payment status, listing payments, selecting payment,
+   * then applying status change via PaymentService.
+   */
   private void handleUpdatePaymentStatus(User manager) {
     System.out.println("---- Update Payment Status ----");
 
-    // Optionally: filter by date, direction, etc.
     List<Payment> list = paymentService.getAllPayments();
     if (list.isEmpty()) {
       System.out.println("No payments found.");
@@ -151,13 +167,17 @@ public class FinanceManagerMenu {
     Status newStatus = promptEnumSelection("New Status", Status.class);
 
     try {
-      paymentService.updatePaymentStatus(paymentId, newStatus, manager.getId()); // Audit log automatically
+      paymentService.updatePaymentStatus(paymentId, newStatus, manager.getId());
       System.out.println("✅ Status updated.");
     } catch (Exception ex) {
       System.out.println("❌ Update failed: " + ex.getMessage());
     }
   }
 
+  /**
+   * Allows viewing payments filtered by various criteria or all,
+   * displaying summary in tabulated format.
+   */
   private void handleViewPayments(User manager) {
     System.out.println("---- View Payments ----");
     System.out.println("Filter by:");
@@ -200,6 +220,11 @@ public class FinanceManagerMenu {
     }
   }
 
+  /**
+   * Handles generating monthly or quarterly reports,
+   * ensures safe handling of empty or invalid periods.
+   * Allows optional export of report in multiple formats.
+   */
   private void handleGenerateReport() {
     System.out.println("---- Generate Report ----");
     System.out.println("1. Monthly Report");
@@ -234,6 +259,7 @@ public class FinanceManagerMenu {
         return;
       }
 
+      // Print the report summary to console
       reportService.printReport(reportData);
     } catch (EmptyResultException e) {
       System.out.println("No payments found for the selected period.");
@@ -255,7 +281,7 @@ public class FinanceManagerMenu {
     System.out.print("Enter your choice (1-5): ");
     int exportChoice = readIntChoice(1, 5);
 
-    String html = null; // Generate only once if needed
+    String html = null; // Generate HTML only once if needed
 
     if (exportChoice == 1 || exportChoice == 3) {
       if (html == null) html = reportService.buildHtmlReport(reportData, title);
@@ -286,8 +312,7 @@ public class FinanceManagerMenu {
     }
   }
 
-
-  // ========== UTILITIES ==========
+  // ---------- Helper Methods -------------
 
   private int readIntChoice(int min, int max) {
     while (true) {

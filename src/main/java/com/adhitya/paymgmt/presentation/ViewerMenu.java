@@ -1,27 +1,39 @@
 package com.adhitya.paymgmt.presentation;
 
-import com.adhitya.paymgmt.model.Payment;
-import com.adhitya.paymgmt.model.User;
-import com.adhitya.paymgmt.model.enums.PaymentCategory;
-import com.adhitya.paymgmt.model.enums.PaymentDirection;
-import com.adhitya.paymgmt.service.PaymentService;
-import com.adhitya.paymgmt.service.ReportService;
+import com.adhitya.paymgmt.dto.ReportDataDTO;
+import com.adhitya.paymgmt.exception.EmptyResultException;
+import com.adhitya.paymgmt.model.*;
+import com.adhitya.paymgmt.model.enums.*;
+import com.adhitya.paymgmt.service.*;
+import com.adhitya.paymgmt.repository.CounterpartyRepository;
+import com.adhitya.paymgmt.repository.EmployeeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * ViewerMenu provides the command-line interface options available
+ * to users with the Viewer role. Viewers can view payments with filters
+ * and generate reports but cannot modify data.
+ */
 public class ViewerMenu {
   private final Scanner scanner;
   private final PaymentService paymentService;
   private final ReportService reportService;
 
+  /**
+   * Construct ViewerMenu given payment and report services, and scanner for input.
+   */
   public ViewerMenu(Scanner scanner, PaymentService paymentService, ReportService reportService) {
     this.scanner = scanner;
     this.paymentService = paymentService;
     this.reportService = reportService;
   }
 
+  /**
+   * Displays the viewer dashboard and processes user menu selections in a loop.
+   */
   public void showViewerMenu(User viewer) {
     while (true) {
       System.out.println("========== Viewer Dashboard ==========");
@@ -43,8 +55,10 @@ public class ViewerMenu {
     }
   }
 
-  // ================= MENU ACTIONS =================
-
+  /**
+   * Handles viewing payments with filtering by all, date range, or category.
+   * Displays payments in a neatly formatted tabular form.
+   */
   private void handleViewPayments() {
     System.out.println("---- View Payments ----");
     System.out.println("Filter by:");
@@ -88,10 +102,14 @@ public class ViewerMenu {
     }
   }
 
+  /**
+   * Handles generation of monthly or quarterly payment reports.
+   * Prompts for year and month/quarter, then delegates to ReportService.
+   */
   private void handleGenerateReport() {
     System.out.println("---- Generate Report ----");
     System.out.print("1. Monthly  2. Quarterly  > ");
-    int type = readIntChoice(1,2);
+    int type = readIntChoice(1, 2);
 
     int year = promptInt("Enter year (e.g. 2025): ");
     if (type == 1) {
@@ -105,6 +123,9 @@ public class ViewerMenu {
 
   // ================= UTILITIES =================
 
+  /**
+   * Reads an integer choice from user input bounded by min and max, with validation.
+   */
   private int readIntChoice(int min, int max) {
     while (true) {
       String line = scanner.nextLine();
@@ -117,11 +138,17 @@ public class ViewerMenu {
     }
   }
 
+  /**
+   * Prompts for a String input with a message.
+   */
   private String promptString(String label) {
     System.out.print(label);
     return scanner.nextLine().trim();
   }
 
+  /**
+   * Prompts for an integer input with validation.
+   */
   private int promptInt(String label) {
     while (true) {
       System.out.print(label);
@@ -134,6 +161,9 @@ public class ViewerMenu {
     }
   }
 
+  /**
+   * Prompts for a LocalDate in YYYY-MM-DD format, validating input.
+   */
   private LocalDate promptDate(String label) {
     while (true) {
       System.out.print(label);
@@ -146,6 +176,9 @@ public class ViewerMenu {
     }
   }
 
+  /**
+   * Prompts the user to select an enum value of given enum class by its name.
+   */
   private <T extends Enum<T>> T promptEnumSelection(String label, Class<T> enumClass) {
     while (true) {
       System.out.print(label + " ");
@@ -161,6 +194,9 @@ public class ViewerMenu {
     }
   }
 
+  /**
+   * Truncates a string to specified length, appending ellipsis if truncated.
+   */
   private String truncate(String str, int length) {
     if (str == null) return "-";
     return str.length() > length ? str.substring(0, length - 3) + "..." : str;

@@ -14,9 +14,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Admin menu class responsible for presenting options and handling
+ * user actions accessible to users with Admin role.
+ * Provides facilities for user registration, entity management,
+ * viewing payments, report generation, and audit log viewing.
+ */
 public class AdminMenu {
   private final Scanner scanner;
-  // Services are provided/injected
+  // Injected services handling business logic
   private final AuthService authService;
   private final CounterpartyService counterpartyService;
   private final EmployeeService employeeService;
@@ -24,6 +30,9 @@ public class AdminMenu {
   private final AuditService auditService;
   private final ReportService reportService;
 
+  /**
+   * Constructs the AdminMenu with required services and input scanner.
+   */
   public AdminMenu(
     Scanner scanner,
     AuthService authService,
@@ -42,6 +51,11 @@ public class AdminMenu {
     this.reportService = reportService;
   }
 
+  /**
+   * Displays the admin dashboard repeatedly until logout,
+   * processing user input to invoke respective handler methods.
+   * @param admin the currently logged-in admin user
+   */
   public void showAdminMenu(User admin) {
     while (true) {
       System.out.println("========= Admin Dashboard =========");
@@ -68,19 +82,19 @@ public class AdminMenu {
           return;
         }
       }
-      System.out.println(); // space before showing menu again
+      System.out.println(); // blank line before redisplaying menu
     }
   }
 
-  // ------------------ MENU ACTIONS -------------------
-
+  /** Handles registering a new user by prompting required fields,
+   * validating role input, and invoking AuthService register.
+   */
   private void handleUserRegistration() {
     System.out.println("---- Register New User ----");
     String username = promptString("Enter username: ");
     String password = promptString("Enter password: ");
     String email = promptString("Enter email: ");
 
-    // Prompt for role
     Role role = null;
     while (role == null) {
       System.out.print("Enter role (ADMIN/MANAGER/VIEWER): ");
@@ -100,6 +114,7 @@ public class AdminMenu {
     }
   }
 
+  /** Handles adding a new counterparty after taking input and validating type. */
   private void handleAddCounterparty() {
     System.out.println("---- Add Counterparty ----");
     String name = promptString("Enter name: ");
@@ -130,6 +145,7 @@ public class AdminMenu {
     }
   }
 
+  /** Handles adding a new employee with name and optional department input. */
   private void handleAddEmployee() {
     System.out.println("---- Add Employee ----");
     String name = promptString("Enter employee name: ");
@@ -147,6 +163,7 @@ public class AdminMenu {
     }
   }
 
+  /** Displays all payments in a formatted table. */
   private void handleViewAllPayments() {
     System.out.println("---- All Payments ----");
     List<Payment> payments = paymentService.getAllPayments();
@@ -154,7 +171,6 @@ public class AdminMenu {
       System.out.println("(No payments found.)");
       return;
     }
-    // Table-like format
     System.out.printf("%-5s %-12s %-10s %-12s %-12s %-10s %-15s%n",
       "ID", "Amount", "Direction", "Category","Status", "CreatedBy", "CreatedAt");
     System.out.println("-".repeat(80));
@@ -170,6 +186,7 @@ public class AdminMenu {
     }
   }
 
+  /** Presents user with monthly/quarterly report options and invokes report generation. */
   private void handleGenerateReport() {
     System.out.println("---- Generate Report ----");
     System.out.println("1. Monthly Report");
@@ -187,6 +204,7 @@ public class AdminMenu {
     }
   }
 
+  /** Displays all audit logs with summary info in tabular form. */
   private void handleViewAuditLogs() {
     System.out.println("---- Audit Logs ----");
     List<AuditLog> logs = auditService.getAllAuditLogs();
@@ -210,8 +228,9 @@ public class AdminMenu {
     }
   }
 
-  // ------------------ UTILS -------------------
+  // ----------- Helper Methods -----------
 
+  /** Safely reads an integer choice between min and max from user input. */
   private int readIntChoice(int min, int max) {
     while (true) {
       String line = scanner.nextLine();
@@ -223,6 +242,8 @@ public class AdminMenu {
       System.out.print("Invalid choice. Please enter " + min + "–" + max + ": ");
     }
   }
+
+  /** Prompts user for an integer input with the given label and validates it. */
   private int promptInt(String label) {
     while (true) {
       System.out.print(label);
@@ -233,9 +254,10 @@ public class AdminMenu {
       }
     }
   }
+
+  /** Prompts user for a string input with the given label. */
   private String promptString(String label) {
     System.out.print(label);
     return scanner.nextLine().trim();
   }
 }
-

@@ -9,7 +9,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Responsible for printing detailed monthly or quarterly financial reports
+ * to the console in a clean, readable format.
+ * Utilizes repositories to fetch entity names for display purposes.
+ */
 public class ReportPrinter {
+  // Constants for formatting output borders and date formats
   private static final String BORDER = "=".repeat(80);
   private static final String SECTION_BORDER = "-".repeat(80);
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MMM-yy");
@@ -17,12 +23,24 @@ public class ReportPrinter {
   private final EmployeeRepository employeeRepository;
   private final CounterpartyRepository counterpartyRepository;
 
+  /**
+   * Initializes ReportPrinter with required entity repositories for data resolution.
+   *
+   * @param employeeRepository    Repository to fetch employee data
+   * @param counterpartyRepository Repository to fetch counterparty data
+   */
   public ReportPrinter(EmployeeRepository employeeRepository,
                        CounterpartyRepository counterpartyRepository) {
     this.employeeRepository = employeeRepository;
     this.counterpartyRepository = counterpartyRepository;
   }
 
+  /**
+   * Primary method to print the complete report with structured sections:
+   * header, summary info, aggregates, breakdowns, and transaction details.
+   *
+   * @param data the compiled report data DTO
+   */
   public void printReport(ReportDataDTO data) {
     printHeader(data);
     printBasicInfo(data);
@@ -91,6 +109,7 @@ public class ReportPrinter {
       "Date", "Amount", "Direction", "Category", "Description", "Party", "Status");
 
     data.transactions().forEach(p -> {
+      // Resolve party name based on payment involving employee or counterparty
       String partyInfo = p.getEmployee() != null
         ? employeeRepository.findById(p.getEmployee().getId()).getName()
         : counterpartyRepository.findById(p.getCounterParty().getId()).getName();
@@ -107,16 +126,18 @@ public class ReportPrinter {
     System.out.println(SECTION_BORDER);
   }
 
-  // Helper methods
+  // Helper method: format LocalDate to string with specified pattern
   private String formatDate(LocalDate date) {
     return date.format(DATE_FORMAT);
   }
 
+  // Helper method: center-align text within an 80-character width line
   private String centerText(String text) {
     return String.format("%" + (80 + text.length()) / 2 + "s", text);
   }
 
+  // Helper method: truncates string and adds ellipsis if longer than specified length
   private String truncate(String str, int length) {
-    return str.length() > length ? str.substring(0, length-3) + "..." : str;
+    return str.length() > length ? str.substring(0, length - 3) + "..." : str;
   }
 }
